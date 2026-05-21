@@ -11,11 +11,12 @@
 		<p id="histfloodinstr">Press and hold [H] to activate HistFloodR (Rapid redirect)</p>
 		<script>
 			setTimeout(() => {
-				alert("load");
 				document.addEventListener("keydown", (e) => {
 					if (e.key === "h" || e.key === "H") {
-						alert("keydown");
-						window.location = "https://example.com";
+						window.location = "/hfr/"
+							+ Math.floor(1e12 * Math.random()).toString(36)
+							+ "-"
+							+ Math.floor(1e12 * Math.random()).toString(36);
 					}
 				});
 			}, 80);
