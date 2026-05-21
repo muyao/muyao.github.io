@@ -10,7 +10,7 @@
 		<h1>404 Not found</h1>
 		<p id="histfloodinstr">Press and hold [H] to activate HistFloodR (Rapid redirect)</p>
 		<script>
-			document.onload(() => {
+			document.addEventListener("load", () => {
 				document.addEventListener("keydown", (e) => {
 					if (e.key === "h" || e.key === "H") {
 						window.location = "https://example.com";
