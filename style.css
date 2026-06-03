@@ -8,7 +8,7 @@ body {
 	margin-left: 40px;
 	overflow: hidden;
 }
-body a {
+body > a {
 	margin-left: 80px;
 }
 h1 {
@@ -17,6 +17,7 @@ h1 {
 	letter-spacing: 2px;
 }
 a {
+	color: white;
 	text-decoration: none;
 	line-height: 1.7;
 }
