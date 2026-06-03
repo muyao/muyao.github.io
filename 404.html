@@ -8,20 +8,6 @@
 	</head>
 	<body>
 		<h1>404 Not found</h1>
-		<p id="histfloodinstr">Press and hold [H] to activate HistFloodR (Rapid redirect)</p>
-		<script>
-			document.addEventListener("keydown", (e) => {
-				if (e.key === "h" || e.key === "H") {
-					window.location = "/hfr/"
-						+ Math.floor(1e12 * Math.random()).toString(36)
-						+ "-"
-						+ Math.floor(1e12 * Math.random()).toString(36)
-						+ "-"
-						+ Math.floor(1e12 * Math.random()).toString(36)
-						+ "-"
-						+ Math.floor(1e12 * Math.random()).toString(36);
-				}
-			});
-		</script>
+		<a href="/">Back</a>
 	</body>
 </html>
