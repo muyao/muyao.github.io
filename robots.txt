@@ -1,2 +1,2 @@
 User-agent: *
-Disallow: /hide-this/
+Disallow: /
