@@ -10,8 +10,7 @@ body {
 	flex-direction: column;
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	justify-content: flex-start;
-	padding-top: 2.5rem;
-	padding-left: 2.5rem;
+	padding: 2.5rem 2.5rem 2.5rem 2.5rem;
 	overflow-x: hidden;
 }
 
