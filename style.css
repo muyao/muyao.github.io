@@ -1,22 +1,29 @@
-body {
-	background-color: black;
-	color: white;
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+header {
+	margin-bottom: 2.5rem;
+}
+
+.title-label {
+	letter-spacing: 0.125rem;
+}
+
+main {
 	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	margin-left: 40px;
-	overflow: hidden;
+	flex-direction: row;
+	flex-wrap: wrap;
 }
-h1 {
-	margin-top: 40px;
-	letter-spacing: 2px;
+
+.category-container {
+	margin-bottom: 2.5rem;
+	margin-right: 2.5rem;
+	padding: 0.6rem;
+	width: 14rem;
 }
-a {
-	color: white;
-	text-decoration: none;
-	line-height: 1.7;
+
+.category-container>hr {
+	margin-bottom: 0.35rem;
+	margin-top: 0.35rem;
 }
-a:hover {
-	text-decoration: underline;
+
+.category-label {
+	font-size: 1.17rem;
 }
