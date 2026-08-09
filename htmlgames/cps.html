@@ -2,38 +2,39 @@
 <html>
 
 <head>
-    <title>
-        CPS Test
-    </title>
-    <style>
-        body {
-            padding: 60px;
-        }
-        p {
-            color:white;
-        }
-    </style>
+	<title>
+		CPS Test
+	</title>
+	<style>
+		body {
+			padding: 60px;
+		}
+
+		p {
+			color: white;
+		}
+	</style>
 </head>
 
 <body style="background-color:black;">
-    <button onclick="clicked()" width=300 height=200>Click me</button>
-    <p id="cpsdisplay">CPS: 0</p>
-    <script>
-        "use strict";
-        let clicks = 0;
-        let cps = 0;
-        function clicked() {
-            clicks += 1
-        }
-        document.addEventListener("keydown", clicked);
-        setInterval(function () {
-            document.getElementById("cpsdisplay").innerHTML = "CPS: " + cps;
-        }, 16);
-        setInterval(function () {
-            cps = clicks;
-            clicks = 0;
-        }, 1000);
-    </script>
+	<button onclick="clicked()" width=300 height=200>Click me</button>
+	<p id="cpsdisplay">CPS: 0</p>
+	<script>
+		"use strict";
+		let clicks = 0;
+		let cps = 0;
+		function clicked() {
+			clicks += 1
+		}
+		document.addEventListener("keydown", clicked);
+		setInterval(function () {
+			document.getElementById("cpsdisplay").innerHTML = "CPS: " + cps;
+		}, 16);
+		setInterval(function () {
+			cps = clicks;
+			clicks = 0;
+		}, 1000);
+	</script>
 </body>
 
 </html>
