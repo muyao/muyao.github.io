@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        Textured Triangle Filler
+    </title>
+</head>
+
+<body>
+    <canvas id="canvas" tabindex="0" style="border:1px solid black" onclick="Sys.start();"
+        onkeydown="Controls.keyDown();" onkeyup="Controls.keyUp();"></canvas>
+    <p id="debug"></p>
+    <script>
+        "use strict";
+
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 960;
+        canvas.height = 720;
+        ctx.save();
+
+        const Sys = {
+            hasStarted: false,
+            time: Date.now(),
+            mspt: 33,
+            fps: 30,
+
+            start: function () {
+                if (!Sys.hasStarted) {
+                    Sys.hasStarted = true;
+                }
+            },
+
+            updData: function () {
+                Sys.mspt = Date.now() - this.time;
+                Sys.fps = Math.floor(1000 / Sys.mspt);
+                Sys.time = Date.now();
+            },
+
+            tick: function () {
+                Sys.updData();
+
+                Debug.set("");
+                Debug.log("Has Started: " + Sys.hasStarted);
+                Debug.log("Time: " + Math.floor(Sys.time));
+                Debug.log("MSPT: " + Sys.mspt);
+                Debug.log("Desired MSPT: 250");
+                Debug.log("====================");
+                Debug.log("Draws 500 triangles per frame (2000/s)");
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (Sys.hasStarted) {
+
+                    for (let i = 0; i < 500; i++) {
+                        Tri.fill(
+                            canvas.width * Math.random(), canvas.height * Math.random(),
+                            canvas.width * Math.random(), canvas.height * Math.random(),
+                            canvas.width * Math.random(), canvas.height * Math.random(),
+                            Srcs.ttf[Math.floor(2*Math.random())], 64, 64
+                        );
+                    }
+
+                } else {
+                    ctx.font = "96px serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("Click to Start", canvas.width / 2, canvas.height / 2);
+                }
+            },
+        };
+
+        const Debug = {
+            set: function (setTo) {
+                document.getElementById("debug").innerHTML = setTo;
+            },
+
+            log: function (log) {
+                document.getElementById("debug").innerHTML += "<br>";
+                document.getElementById("debug").innerHTML += log;
+            },
+        };
+
+        const Controls = {
+            keys: [],
+
+            keyDown: function () {
+                if (!Controls.keys.includes(event.key)) {
+                    Controls.keys.push(event.key);
+                }
+            },
+
+            keyUp: function () {
+                Controls.keys.splice(Controls.keys.indexOf(event.key), 1);
+            }
+        };
+
+        const Tri = {
+            fill: function (tlX, tlY, blX, blY, trX, trY, texture, tsX, tsY) {
+                ctx.save();
+                ctx.setTransform((trX - tlX) / tsX, (trY - tlY) / tsY, (blX - tlX) / tsX, (blY - tlY) / tsY, tlX, tlY);
+                ctx.drawImage(texture, 0, 0);
+                ctx.restore();
+            },
+        };
+
+        const Srcs = {
+            ttf: [
+                new Image(),
+                new Image(),
+            ],
+        };
+
+        Srcs.ttf[0].src = "ttf1.png";
+        Srcs.ttf[1].src = "ttf2.png";
+        setInterval(Sys.tick, 250);
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Dodger</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #111;
+            overflow: hidden; /* Prevents scrollbars */
+            touch-action: none; /* Prevents default browser touch gestures like swiping back */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            pointer-events: none; /* Let clicks/touches pass through to the canvas */
+        }
+        #score {
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        #instructions {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-layer">
+        <div id="score">0</div>
+        <div id="instructions">Drag to dodge the red blocks</div>
+    </div>
+    
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+
+        let width, height;
+        let player, enemies, score, frame, isGameOver;
+        let animationId;
+
+        // Initialize and reset game variables
+        function init() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            let playerSize = Math.min(width, height) * 0.08; // Responsive player size
+
+            player = {
+                width: playerSize,
+                height: playerSize,
+                x: width / 2 - playerSize / 2,
+                y: height - playerSize - 50,
+                color: '#00ffff'
+            };
+
+            enemies = [];
+            score = 0;
+            frame = 0;
+            isGameOver = false;
+            scoreElement.innerText = score;
+            
+            if (animationId) cancelAnimationFrame(animationId);
+            loop();
+        }
+
+        // Handle resizing (e.g., rotating a mobile device)
+        window.addEventListener('resize', () => {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            player.y = height - player.height - 50; 
+        });
+
+        // Universal input handler for touch and mouse
+        function handleInput(e) {
+            e.preventDefault(); // Stop default browser behaviors
+            
+            if (isGameOver) {
+                // Tapping restarts the game
+                init();
+                return;
+            }
+
+            // Extract the X coordinate depending on touch vs mouse event
+            let clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+            
+            // Move player to the center of the touch/click
+            player.x = clientX - player.width / 2;
+
+            // Keep player within screen bounds
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > width) player.x = width - player.width;
+        }
+
+        // Event Listeners for smooth mobile dragging and desktop testing
+        window.addEventListener('touchmove', handleInput, { passive: false });
+        window.addEventListener('touchstart', handleInput, { passive: false });
+        window.addEventListener('mousemove', handleInput);
+        window.addEventListener('mousedown', handleInput);
+
+        function spawnEnemy() {
+            let baseSize = Math.min(width, height) * 0.06;
+            let size = Math.random() * baseSize + baseSize; // Randomize size slightly
+            let x = Math.random() * (width - size);
+            // Difficulty curve: speed increases as score goes up
+            let speed = (height * 0.005) + Math.random() * 3 + (score * 0.1); 
+            
+            enemies.push({
+                x: x, 
+                y: -size, 
+                width: size, 
+                height: size, 
+                speed: speed, 
+                color: '#ff0044'
+            });
+        }
+
+        function loop() {
+            if (isGameOver) return;
+            animationId = requestAnimationFrame(loop);
+            
+            // Clear screen with a slight trailing effect
+            ctx.fillStyle = 'rgba(17, 17, 17, 0.5)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw Player with "Neon" glow
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = player.color;
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Enemy logic
+            frame++;
+            // Difficulty curve: spawn objects faster as score increases
+            let spawnRate = Math.max(15, 50 - Math.floor(score / 3)); 
+            
+            if (frame % spawnRate === 0) {
+                spawnEnemy();
+            }
+
+            ctx.shadowColor = '#ff0044'; // Red glow for enemies
+
+            for (let i = 0; i < enemies.length; i++) {
+                let e = enemies[i];
+                e.y += e.speed;
+                
+                ctx.fillStyle = e.color;
+                ctx.fillRect(e.x, e.y, e.width, e.height);
+
+                // Axis-Aligned Bounding Box (AABB) Collision Detection
+                if (player.x < e.x + e.width &&
+                    player.x + player.width > e.x &&
+                    player.y < e.y + e.height &&
+                    player.y + player.height > e.y) {
+                    
+                    isGameOver = true;
+                    
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 30px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('GAME OVER', width / 2, height / 2 - 20);
+                    ctx.font = '20px sans-serif';
+                    ctx.fillText('Tap to Restart', width / 2, height / 2 + 20);
+                }
+
+                // If enemy goes off screen at the bottom
+                if (e.y > height) {
+                    enemies.splice(i, 1);
+                    i--; // Adjust index after array mutation
+                    score++;
+                    scoreElement.innerText = score;
+                }
+            }
+            
+            // Reset shadow to avoid affecting other renders
+            ctx.shadowBlur = 0; 
+        }
+
+        // Start the game
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YouTube Video Embedder</title>
+  <style>
+    body {
+      padding: 20px;
+    }
+    input {
+      width: 400px;
+      padding: 8px;
+    }
+    button {
+      padding: 8px 12px;
+    }
+    #videoContainer {
+      margin-top: 20px;
+    }
+    iframe {
+      width: 560px;
+      height: 315px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Enter a YouTube Link:</h2>
+  <input type="text" id="youtubeLink" placeholder="Paste YouTube URL here" />
+  <button onclick="embedVideo()">Watch</button>
+
+  <div id="videoContainer"></div>
+
+  <script>
+    function extractVideoID(url) {
+      const regex = /(?:youtube\.com.*(?:v=|\/embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+      const match = url.match(regex);
+      return match ? match[1] : null;
+    }
+
+    function embedVideo() {
+      const url = document.getElementById("youtubeLink").value;
+      const videoID = extractVideoID(url);
+      const container = document.getElementById("videoContainer");
+
+      if (videoID) {
+        const embedURL = `https://www.youtube.com/embed/${videoID}?modestbranding=1&rel=0`;
+        container.innerHTML = `<iframe src="${embedURL}" allowfullscreen></iframe>`;
+      } else {
+        container.innerHTML = "<p style='color: red;'>Invalid YouTube URL.</p>";
+      }
+    }
+  </script>
+
+</body>
+</html>

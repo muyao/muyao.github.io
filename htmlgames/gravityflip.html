@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Canvas Game</title>
+    </head>
+    <body>
+        <p id="data">[ Not running ]</p>
+        <canvas id="canvas" tabindex="0" onclick="start()" onkeydown="Controls.currKey = event.key" onkeyup="Controls.currKey = ''" style="border:1px solid #000000"></canvas>
+        <h4>
+            Instructions:<br>- Click the screen to start.<br>- You are the square.<br>- Don't collide with any spikes.<br>- Dodge them by flipping gravity.<br>- Press any key to flip it.
+        </h4>
+        <script>
+            "use strict";
+
+            // init canvas
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.height = 720;
+            canvas.width = 960;
+            // ctx.transform(1, 0, 0, 1, 0, canvas.height);
+            console.log(ctx);
+
+            ctx.font = "96px serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.lineWidth = 3;
+            ctx.strokeText("Click to start", canvas.width / 2, canvas.height / 2);
+
+            // init objects
+            const Controls = {
+                currKey: "",
+                cooldown: false,
+            }
+
+            const System = {
+                hasStarted: false,
+                mspt: 50,
+                oldnow: Date.now(),
+            }
+
+            const Pen = {
+                line: function(x1, y1, x2, y2) {
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                },
+            }
+
+            const Player = {
+                x: 0,
+                y: canvas.height / 2,
+                currSide: ["up", "down"][Math.floor(2 * Math.random())],
+                dead: false,
+                goingToDie: false,
+            }
+
+            const Camera = {
+                x: 0,
+            }
+
+            // init arrays
+
+            const spikeChoices = [
+                "up",
+                "down",
+            ];
+
+            const spikeDat = [];
+
+            let lineDat = [];
+
+            // init variables
+            const bpm = 160;
+            let nextSpike = 2200;
+            
+            let startTime = undefined;
+            let timeNow = undefined;
+
+            // init functions
+            function display (id, text) {
+                document.getElementById(id).innerHTML = text;
+            }
+
+            function start() {
+                if (! System.hasStarted) {
+                    System.hasStarted = true;
+                    startTime = Date.now() // 200 * bpm * Date.now() - startTime / 60000
+                    tick();
+                } else {
+                    if (Player.currSide === "up") {
+                        Player.currSide = "down";
+                    } else if (Player.currSide === "down") {
+                        Player.currSide = "up";
+                    } else {
+                        console.log("Player: Invalid currSide");
+                    }
+                }
+            }
+
+            function spawnSpike(d) {
+                spikeDat.push([Player.x + d, spikeChoices[Math.floor(2 * Math.random())]])
+            }
+
+            function spike(left, ud) {
+                if (ud === "up") {
+                    lineDat.push([left, canvas.height - 100, left + 100, canvas.height - 100]);
+                    lineDat.push([left, canvas.height - 100, left + 50, canvas.height - 200]);
+                    lineDat.push([left + 100, canvas.height - 100, left + 50, canvas.height - 200]);
+                } else if (ud === "down") {
+                    lineDat.push([left, 100, left + 100, 100]);
+                    lineDat.push([left, 100, left + 50, 200]);
+                    lineDat.push([left + 100, 100, left + 50, 200]);
+                } else {
+                    console.log("newSpike: Invalid Input");
+                }
+            }
+
+            // init spikes
+            for (let i = 1; i <= 6; i++) {
+                spawnSpike((200 * i) + 1000);
+            }
+
+            // main loop
+            function tick() {
+
+
+                // tick system
+                System.mspt = Date.now() - System.oldnow;
+                System.oldnow = Date.now();
+                display("data", "MSPT: " + System.mspt + " / Key: [" + Controls.currKey + "] / Current x:" + Math.floor(Player.x));
+
+
+                // tick camera
+                Camera.x = Player.x + 360 - canvas.width / 2;
+
+
+                // clear lines
+                lineDat = [];
+
+
+                // tick bg
+                lineDat.push([0, 100, canvas.width, 100]);
+                lineDat.push([0, canvas.height - 100, canvas.width,  canvas.height - 100]);
+
+
+                // tick player
+                if (! Player.dead) {
+                    Player.x = 200 * bpm * (Date.now() - startTime) / 60000
+                    timeNow = Date.now();
+
+                    if ((Controls.currKey === "")) {
+                        Controls.cooldown = false;
+                    } else {
+                        if (! Controls.cooldown) {
+                            Controls.cooldown = true;
+                            if (Player.currSide === "up") {
+                                Player.currSide = "down";
+                            } else if (Player.currSide === "down") {
+                                Player.currSide = "up";
+                            } else {
+                                console.log("Player: Invalid currSide");
+                            }
+                        }
+                    }
+                }
+
+                if (Player.goingToDie) {
+                    Player.dead = true;
+                }
+
+                if (Player.currSide === "up") {
+                    Player.y += (canvas.height - 125 - Player.y) / 2;
+                } else if (Player.currSide === "down") {
+                    Player.y += (125 - Player.y) / 2;
+                } else {
+                    console.log("Player: Invalid currSide");
+                }
+
+                lineDat.push([Player.x - 25 - Camera.x, Player.y - 25, Player.x + 25 - Camera.x, Player.y - 25]);
+                lineDat.push([Player.x - 25 - Camera.x, Player.y + 25, Player.x + 25 - Camera.x, Player.y + 25]);
+                lineDat.push([Player.x - 25 - Camera.x, Player.y - 25, Player.x - 25 - Camera.x, Player.y + 25]);
+                lineDat.push([Player.x + 25 - Camera.x, Player.y - 25, Player.x + 25 - Camera.x, Player.y + 25]);
+
+                for (let thisSpike of spikeDat) {
+                    if (thisSpike[1] === Player.currSide) {
+                        if ((thisSpike[0] - Player.x < 30) && (thisSpike[0] - Player.x > -80)) {
+                            Player.goingToDie = true;
+                        }
+                    }
+                }
+
+
+
+                // tick spikes
+                if ((spikeDat[0])[0] - Camera.x < -100) {
+                    spikeDat.shift();
+                }
+                if (Player.x + 2200 >= nextSpike) {
+                    nextSpike += 200;
+                    spawnSpike(nextSpike - Player.x);
+                }
+                for (let thisSpike of spikeDat) {
+                    spike(thisSpike[0] - Camera.x, thisSpike[1]);
+                }
+
+                // clear background
+                ctx.beginPath();
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // draw lines
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = "#000000";
+                for (let line of lineDat) {
+                    Pen.line(line[0], line[1], line[2], line[3]);
+                }
+                
+                // delay before next tick
+                setTimeout(tick, 16);
+                if (Player.goingToDie) {
+                    ctx.textBaseline = "middle";
+
+                    ctx.font = "96px serif";
+                    ctx.textAlign = "center";
+                    ctx.strokeText("Game Over", canvas.width / 2, canvas.height / 2 - 66);
+
+                    ctx.font = "48px serif";
+                    ctx.textAlign = "center";
+                    ctx.lineWidth = 2.5
+                    ctx.strokeText("Score: " + Math.floor((bpm * (timeNow - startTime) / 60000)), canvas.width / 2, canvas.height / 2 + 6);
+                    ctx.strokeText("Refresh the page to try again", canvas.width / 2, canvas.height / 2 + 66);
+                }
+            }
+        </script>
+    </body>
+</html>

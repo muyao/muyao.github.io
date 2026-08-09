@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+	background-color: black;
+	color: white;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.flex {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+#clickme {
+	margin-top: 150px;
+}
+</style>
+<title>CPS Test</title>
+</head>
+<body class="flex">
+<div>
+	<div>
+		<h1 class="flex" id="clickme">Click me</h1>
+	</div>
+	<div>
+		<div class="flex"><b>CPS: </b><span id="display">0</span></div>
+	</div>
+</div>
+<script>
+let isInverted = false;
+let cps = 0;
+let clicks = 0;
+
+function handleClick() {
+	if (isInverted) {
+		document.documentElement.style.filter="";
+	} else {
+		document.documentElement.style.filter="invert(1) hue-rotate(180deg)";
+	}
+	isInverted =  !isInverted;
+	clicks += 1;
+}
+document.addEventListener("click", (e) => {
+	e.preventDefault();
+	handleClick();
+});
+document.addEventListener("keydown", (e) => {
+	e.preventDefault();
+	handleClick();
+});
+clearInterval(window.perSecondInterval);
+window.perSecondInterval = setInterval(() => {
+	cps = clicks;
+	clicks = 0;
+	document.getElementById("display").innerHTML = cps;
+}, 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+	background-color: black;
+	color: white;
+	display: flex;
+	flex-direction: row;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	justify-content: center;
+}
+.clickable {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+#warning {
+	color: red;
+	margin-top: 150px;
+}
+</style>
+<title>CPS Test</title>
+</head>
+<body>
+<div>
+	<h1 id="warning">Epilepsy warning. Proceed at your own risk.</h1>
+	<br>
+	<br>
+	<div id="continue" class="clickable"><u><b>Continue</b></u></div>
+	<br>
+	<br>
+	<div id="back" class="clickable"><u><b>Back</b></u></div>
+</div>
+<script>
+document.getElementById("back").addEventListener("click", (e) => {
+	e.preventDefault();
+	e.stopImmediatePropagation();
+	window.location="https://muyao.app";
+});
+document.getElementById("continue").addEventListener("click", (e) => {
+	e.preventDefault();
+	e.stopImmediatePropagation();
+	window.location="cpstest.html";
+});
+</script>
+</body>
+</html>

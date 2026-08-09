@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Text Editor</title>
+<style>
+	body {
+		background-color: black;
+		color: white;
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		padding: 20px 40px 0px 40px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		overflow: hidden
+	}
+
+	textarea {
+		border: 2px solid white;
+		border-radius: 4px;
+		font-family: monospace;
+		font-size: 20px;
+		height: 480px;
+	}
+	
+	.button {
+		border: 2px solid white;
+		border-radius: 4px;
+		margin: 10px;
+		padding: 5px;
+		text-align: center;
+		width: 100px;
+	}
+	
+	.row-container {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+	}
+	
+	#fileinput {
+		display: none;
+	}
+</style>
+</head>
+<body>
+<h1>Text Editor</h1>
+<textarea placeholder="Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur adipiscing elit quisque faucibus." id="editor"></textarea>
+<div class="row-container">
+<div class="button" id="save">Save</div>
+<div class="button" id="load">Load</div>
+</div>
+<input type="file" id="fileinput" accept=".txt,text/plain">
+<script>
+const textarea = document.getElementById("editor");
+const loadBtn = document.getElementById("load");
+const saveBtn = document.getElementById("save");
+const fileInput = document.getElementById("fileinput");
+loadBtn.addEventListener("click", () => {
+  fileInput.click();
+});
+fileInput.addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  textarea.value = text;
+  fileInput.value = "";
+});
+saveBtn.addEventListener("click", () => {
+  const blob = new Blob([textarea.value], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "text-" + new Date().toUTCString().replaceAll(" ", "-") + ".txt";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>

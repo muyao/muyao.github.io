@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            3d test
+        </title>
+    </head>
+    <body>
+        <canvas id="canvas" tabindex="0" style="border:1px solid black" onclick="run();" onkeydown="keyPressed();" onkeyup="keyReleased();"></canvas>
+        <p id="debug"></p>
+        <script>
+            "use strict";
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = 960;
+            canvas.height = 720;
+
+            const Sys = {
+                hasStarted: false,
+                fps: 30,
+                time: Date.now(),
+            };
+
+            const Controls = {
+                keys: [],
+            };
+
+            const Debug = {
+                set: function(txt) {
+                    document.getElementById("debug").innerHTML = txt;
+                },
+
+                log: function(txt) {
+                    document.getElementById("debug").innerHTML += txt;
+                    document.getElementById("debug").innerHTML += "<br>";
+                }
+            };
+
+            const Player = {
+                x: 0,
+                y: 0,
+                z: 0,
+                pitch: 0,
+                yaw: 0,
+                roll: 0,
+            };
+
+            const Camera = {
+                x: 0,
+                y: 0,
+                z: 0,
+                pitch: 0,
+                yaw: 0,
+                roll: 0,
+                fl: 300,
+            };
+
+            const Engine3d = {
+                
+                rotate: function(x, y, px, py, a) {
+                    const pi = Math.PI;
+                    return [
+                        ((x-px)*Math.cos(a*pi/180))-((y-py)*Math.sin(a*pi/180))+px,
+                        ((x-px)*Math.sin(a*pi/180))+((y-py)*Math.cos(a*pi/180))+py,
+                    ];
+                },
+
+                goTo: function(x, y, z) {
+                    let _tempX = x;
+                    let _tempY = y;
+                    let _tempZ = z;
+                    let _tempPos = undefined;
+
+                    _tempPos = this.rotate(_tempX, _tempZ, Camera.x, Camera.z, Camera.yaw);
+                    _tempX = _tempPos[0];
+                    _tempZ = _tempPos[1];
+
+                    _tempPos = this.rotate(_tempZ, _tempY, Camera.z, Camera.y, Camera.pitch);
+                    _tempZ = _tempPos[0];
+                    _tempY = _tempPos[1];
+
+                    _tempPos = this.rotate(_tempY, _tempX, Camera.y, Camera.x, Camera.roll);
+                    _tempY = _tempPos[0];
+                    _tempX = _tempPos[1];
+
+                    if (_tempZ-Camera.z < 0) {
+                        return[
+                            Camera.fl*(_tempX-Camera.x)/(_tempZ-Camera.z),
+                            Camera.fl*(_tempY-Camera.y)/(_tempZ-Camera.z),
+                        ];
+                    } else {
+                        return [
+                            false,
+                            false,
+                        ];
+                    }
+                },
+            };
+
+            const Graphics = {
+                lines: [],
+            }
+
+            function run() {
+                if (!Sys.hasStarted) {
+                    Sys.hasStarted = true;
+                    tick();
+                }
+            }
+
+            function keyPressed() {
+                if (!(Controls.keys.includes(event.key))) {
+                    Controls.keys.push(event.key);
+                }
+            }
+
+            function keyReleased() {
+                if (Controls.keys.includes(event.key)) {
+                    Controls.keys.splice(Controls.keys.indexOf(event.key), 1);       
+                }
+            }
+
+            function addLine(x1, y1, z1, x2, y2, z2) {
+                let _p1 = undefined;
+                let _p2 = undefined;
+
+                _p1 = Engine3d.goTo(x1, y1, z1);
+                _p2 = Engine3d.goTo(x2, y2, z2);
+
+                if (! _p1[0]) {
+                    _p1[0] = -canvas.width;
+                    _p1[1] = -canvas.height;
+                    _p2[0] = -canvas.width;
+                    _p2[1] = -canvas.height;
+                } else if (! _p2[0]) {
+                    _p1[0] = -canvas.width;
+                    _p1[1] = -canvas.height;
+                    _p2[0] = -canvas.width;
+                    _p2[1] = -canvas.height;
+                }
+
+                Graphics.lines.push([
+                        _p1,
+                        _p2,
+                ]);
+            }
+
+
+
+            ctx.font = "96px serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.lineWidth = 3;
+            ctx.strokeText("Click to start", canvas.width / 2, canvas.height / 2);
+            Debug.set("Not Running");
+
+            function tick() {
+
+                Sys.fps = 1000/(Date.now()-Sys.time);
+                Sys.time = Date.now();
+
+                Debug.set("");
+                Debug.log("Keys: [" + Controls.keys.join("") + "]");
+                Debug.log("FPS: " + Math.floor(Sys.fps));
+
+                if (Controls.keys.includes("ArrowRight")) {
+                    Player.yaw += 3;
+                }
+                if (Controls.keys.includes("ArrowLeft")) {
+                    Player.yaw -= 3;
+                }
+                if (Controls.keys.includes("ArrowUp")) {
+                    Player.pitch += 3;
+                }
+                if (Controls.keys.includes("ArrowDown")) {
+                    Player.pitch -= 3;
+                }
+                if (Controls.keys.includes(",")) {
+                    Player.roll -= 3;
+                }
+                if (Controls.keys.includes(".")) {
+                    Player.roll += 3;
+                }
+                if (Controls.keys.includes("w")) {
+                    Player.x -= 0.1*Math.sin(Player.yaw*Math.PI/180);
+                    Player.z -= 0.1*Math.cos(Player.yaw*Math.PI/180);
+                }
+                if (Controls.keys.includes("s")) {
+                    Player.x += 0.1*Math.sin(Player.yaw*Math.PI/180);
+                    Player.z += 0.1*Math.cos(Player.yaw*Math.PI/180);
+                }
+                if (Controls.keys.includes("d")) {
+                    Player.x -= 0.1*Math.sin((Player.yaw+90)*Math.PI/180);
+                    Player.z -= 0.1*Math.cos((Player.yaw+90)*Math.PI/180);
+                }
+                if (Controls.keys.includes("a")) {
+                    Player.x += 0.1*Math.sin((Player.yaw+90)*Math.PI/180);
+                    Player.z += 0.1*Math.cos((Player.yaw+90)*Math.PI/180);
+                }
+                if (Controls.keys.includes("e")) {
+                    Player.y += 0.1
+                }
+                if (Controls.keys.includes("q")) {
+                    Player.y -= 0.1
+                }
+
+                Camera.x = Player.x;
+                Camera.y = Player.y;
+                Camera.z = Player.z;
+                Camera.pitch = Player.pitch;
+                Camera.yaw = Player.yaw;
+                Camera.roll = Player.roll;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+
+                Graphics.lines = [];
+
+                addLine(-1, -1, -3, 1, -1, -3);
+                addLine(-1, 1, -3, 1, 1, -3);
+                addLine(-1, -1, -3, -1, 1, -3);
+                addLine(1, -1, -3, 1, 1, -3);
+                addLine(-1, -1, -5, 1, -1, -5);
+                addLine(-1, 1, -5, 1, 1, -5);
+                addLine(-1, -1, -5, -1, 1, -5);
+                addLine(1, -1, -5, 1, 1, -5);
+                addLine(-1, -1, -3, -1, -1, -5);
+                addLine(1, -1, -3, 1, -1, -5);
+                addLine(-1, 1, -3, -1, 1, -5);
+                addLine(1, 1, -3, 1, 1, -5);
+
+                for (let line of Graphics.lines) {
+                    ctx.moveTo(line[0][0]+canvas.width/2, line[0][1]+canvas.height/2);
+                    ctx.lineTo(line[1][0]+canvas.width/2, line[1][1]+canvas.height/2);
+                }
+
+                ctx.stroke();
+
+                setTimeout(tick, 33);
+
+            }
+        </script>
+    </body>
+</html>
