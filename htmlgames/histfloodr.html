@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title id="t"></title>
+</head>
+
+<body style="background-color:black;">
+	<script>
+		const a = [
+			"how", "when", "why", "what", "where", "idk", "lorem", "ipsum", "franzosen", "grrrrr", "test",
+			"hwad", "js", "microslop", "java", "or", "bedrock", "questionmark", "i", "am", "not", "a", "bot",
+			"border", "blocks", "a", "golden", "dandelion", "which", "is", "a", "golden", "dandelion", "does",
+			"doris", "walk", "catch", "eat", "eaten", "ihatefallingleaves", "chmchmchm", "me", "out", "of",
+			"context", "shall", "i", "compare", "thee", "to", "a", "summers", "day", "thou", "art", "more",
+			"lovely", "and", "more", "temperate", "rough", "winds", "do", "shake", "the", "darling", "buds",
+			"of", "may", "and", "summers", "lease", "hath", "all", "too", "short", "a", "date", "and", "i",
+			"forgor", "sorry", "i", "meant", "forgot", "how", "it", "continues", "ok", "bye", "ausrufezeichen"
+		];
+		const b = [];
+		for (let i = Math.floor(8 * Math.random()); i < 16; i++) b.push(a[Math.floor(a.length * Math.random())]);
+		document.getElementById("t").innerHTML = b.join(" ");
+		setTimeout(() => {
+			window.location = URL.createObjectURL(
+				new Blob(
+					[
+						document.documentElement.innerHTML
+					],
+					{
+						type: "text/html"
+					}
+				)
+			);
+		}, 1);
+	</script>
+</body>
+
+</html>
