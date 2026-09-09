@@ -1,9 +1,13 @@
 header {
-	margin-bottom: 2.5rem;
+	margin-bottom: 2rem;
 }
 
 .title-label {
 	letter-spacing: 0.125rem;
+}
+
+.visit-my-gh {
+	font-style: italic;
 }
 
 main {
@@ -26,4 +30,8 @@ main {
 
 .category-label {
 	font-size: 1.17rem;
+}
+
+.fa-brands {
+	margin-right: 0.5rem;
 }
