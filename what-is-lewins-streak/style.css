@@ -1,0 +1,72 @@
+header {
+	padding-bottom: 1rem;
+}
+
+.info-main-container {
+	display: flex;
+	flex-direction: row;
+}
+
+input {
+	width: 20rem;
+	height: 2rem;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+}
+
+.info-container {
+	width: 15rem;
+	font-weight: bold;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.info-label {
+	font-size: 1.2rem;
+}
+
+.info-display {
+	font-size: 1.68em;
+	padding-left: 0.22em;
+}
+
+.change-container,
+.alerts {
+	padding-top: 3rem;
+}
+
+.alerts {
+	user-select: none;
+}
+
+.alerts>* {
+	padding-top: 1rem;
+}
+
+label {
+	display: block;
+	padding-bottom: 0.25rem;
+}
+
+input {
+	font-size: 1.5em;
+}
+
+.change-buttons {
+	padding-top: 0.5rem;
+}
+
+.clickable {
+	margin-right: 1rem;
+	user-select: none;
+}
+
+.clickable:hover {
+	text-decoration: underline;
+}
+
+.hidden {
+	display: none;
+}

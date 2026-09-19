@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Lewin's Streak Tracker</title>
+	<link rel="stylesheet" href="/style-global.css">
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="confetti.css">
+</head>
+
+<body>
+	<header>
+		<h1>Lewin's Streak Tracker</h1>
+		<hr>
+	</header>
+	<main>
+		<div>
+			<div class="info-container">
+				<span class="info-label">Current streak:</span>
+				<span class="info-display" id="streak">-</span>
+			</div>
+			<div class="info-container">
+				<span class="info-label">Streak freezes:</span>
+				<span class="info-display" id="freezes">-</span>
+			</div>
+			<div class="info-container">
+				<span class="info-label">Gems:</span>
+				<span class="info-display" id="gems">-</span>
+			</div>
+		</div>
+		<div class="change-container">
+			<form id="change">
+				<label for="password">Password</label>
+				<input type="password" id="password">
+			</form>
+			<div class="change-buttons">
+				<span class="clickable val-change">+1 Streak</span>
+				<span class="clickable val-change">+1 Freeze</span>
+				<span class="clickable val-change">-1 Freeze</span>
+				<span class="clickable val-change">Reset</span>
+			</div>
+		</div>
+		<div class="alerts" id="alerts"></div>
+	</main>
+	<footer>
+		<div class="imexport-container">
+			<span class="clickable" id="import">Import</span>
+			<span class="clickable" id="export">Export</span>
+		</div>
+	</footer>
+	<div class="hidden" id="hidden">
+		<input type="file" id="file-input" accept=".streak">
+	</div>
+	<canvas class="confetti-canvas" id="confetti-canvas"></canvas>
+	<script src="confetti.js"></script>
+	<script src="main.js"></script>
+</body>
+
+</html>
