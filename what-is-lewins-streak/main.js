@@ -155,7 +155,7 @@ async function handleInputFile(ev) {
 		showAlert("Wrong password", "red");
 		return;
 	}
-	if (!checkChecksum(data)) {
+	if (!await checkChecksum(data)) {
 		showAlert("Corrupted data", "red");
 		return;
 	}
@@ -163,7 +163,7 @@ async function handleInputFile(ev) {
 	currentFreezes = data.f;
 	currentGems = data.g;
 	passwordHashCheck = data.h;
-	nextMilestoneRewards = data.m
+	nextMilestoneRewards = data.m;
 	showAlert("Successfully imported streak data", "green");
 	autosave();
 }
@@ -257,7 +257,7 @@ changeButtonArr[3].addEventListener("click", () => {
 	const savedData = localStorage.getItem("autosave_data");
 	if (savedData !== null) {
 		const data = JSON.parse(savedData);
-		if (!checkChecksum(data)) {
+		if (!await checkChecksum(data)) {
 			localStorage.removeItem("autosave_data");
 			localStorage.removeItem("autosave_time");
 			return;
