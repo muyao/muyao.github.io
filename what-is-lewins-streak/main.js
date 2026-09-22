@@ -30,6 +30,7 @@ function launchConfetti() {
 	});
 }
 
+const showAlertDefaultDur = 2500;
 const pricing = {
 	streakFreeze: 15
 };
@@ -71,7 +72,7 @@ function setSyncStatus(status) {
 	}
 }
 
-function showAlert(msg, col, dur = 2500) {
+function showAlert(msg, col, dur = showAlertDefaultDur) {
 	if (alertsDiv.childNodes.length >= 5) return;
 	const alertElem = document.createElement("p");
 	alertElem.innerText = msg;
@@ -247,7 +248,9 @@ changeButtonArr[3].addEventListener("click", async () => {
 	resetAll();
 	setSyncStatus(true);
 	if (!await postKV("streak", currentStreak, passwordHash ?? true)) {
-		setSyncStatus(false);
+		setTimeout(() => {
+			window.location.reload();
+		}, showAlertDefaultDur);
 		return;
 	}
 	await postKV("freezes", currentFreezes, passwordHash ?? true);
