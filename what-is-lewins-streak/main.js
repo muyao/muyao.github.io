@@ -1,18 +1,7 @@
-async function hash(str) {
-	const msgUint8 = new TextEncoder().encode(str);
-	const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
-	const hashArray = Array.from(new Uint8Array(hashBuffer));
-	const hashHex = hashArray
-		.map((b) => b.toString(16).padStart(2, "0"))
-		.join("");
-	return hashHex;
-}
-
 const changeForm = document.querySelector("#change");
 const changeInput = document.querySelector("#password");
 const changeButtonArr = document.querySelectorAll(".val-change");
-const importButton = document.querySelector("#import");
-const exportButton = document.querySelector("#export");
+const changeButtonDiv = document.querySelector("#change-buttons");
 const hiddenDiv = document.querySelector("#hidden");
 const fileInput = document.querySelector("#file-input");
 const alertsDiv = document.querySelector("#alerts");
@@ -22,7 +11,6 @@ const gemsSpan = document.querySelector("#gems");
 const confCanvas = document.querySelector("#confetti-canvas")
 
 const confettiFX = new ConfettiEngine(confCanvas, 0.7);
-
 function launchConfetti() {
 	confettiFX.burst({
 		count: 100,
@@ -42,6 +30,40 @@ function launchConfetti() {
 	});
 }
 
+const pricing = { streakFreeze: 75 };
+let passwordHash = null;
+let syncing = false;
+
+let currentStreak;
+let currentFreezes;
+let currentGems;
+let nextMilestoneRewards;
+
+function resetAll() {
+	currentStreak = 0;
+	currentFreezes = 2;
+	currentGems = 100;
+	nextMilestoneRewards = {
+		"10": [5, 10],
+		"25": [10, 25],
+		"50": [15, 50],
+		"100": [25, 100],
+		"200": [50, 200],
+		"365": [115, 365]
+	};
+}
+resetAll();
+
+function setSyncStatus(status) {
+	changeInput.disabled = status;
+	syncing = status;
+	if (status) {
+		changeButtonDiv.style.color = "gray";
+	} else {
+		changeButtonDiv.style.color = "white";
+	}
+}
+
 function showAlert(msg, col, dur = 2500) {
 	if (alertsDiv.childNodes.length >= 5) return;
 	const alertElem = document.createElement("p");
@@ -53,136 +75,83 @@ function showAlert(msg, col, dur = 2500) {
 	}, dur);
 }
 
-async function checkChecksum(data) {
-	const checksum = data.c;
-	const checksum2 = await hash(JSON.stringify({
-		s: data.s,
-		f: data.f,
-		g: data.g,
-		h: data.h,
-		m: data.m
-	}));
-	if (checksum !== checksum2) {
+function updateDisplayed() {
+	streakSpan.innerText = currentStreak;
+	freezesSpan.innerText = currentFreezes;
+	gemsSpan.innerText = currentGems;
+	requestAnimationFrame(updateDisplayed);
+}
+
+async function hash(str) {
+	const msgUint8 = new TextEncoder().encode(str);
+	const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+	const hashHex = hashArray
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+	return hashHex;
+}
+
+async function getKV() {
+	const response = JSON.parse(
+		await (
+			await fetch(
+				"https://lewins-streak.muyao-app.workers.dev"
+			)
+		).text()
+	);
+	currentStreak = parseInt(response.s);
+	currentFreezes = parseInt(response.f);
+	currentGems = parseInt(response.g);
+	nextMilestoneRewards = JSON.parse(response.m);
+
+}
+
+async function postKV(key, value, passhash) {
+	const response = JSON.parse(
+		await (
+			await fetch(
+				"https://lewins-streak.muyao-app.workers.dev",
+				{
+					method: "POST",
+					body: JSON.stringify({ key, value, passhash })
+				}
+			)
+		).text()
+	);
+	if (!response.success) {
+		if (response.message === "incorrect password") {
+			showAlert("Wrong password", "red");
+		} else {
+			showAlert(response.message, "red");
+		}
 		return false;
 	}
-	return true;
+	return response;
 }
 
-const milestoneRewards = {
-	// increment: [reward, nextMilestone]
-	5: [5, 5],
-	10: [5, 10],
-	25: [10, 25],
-	50: [15, 50],
-	100: [25, 100],
-	200: [50, 200],
-	365: [115, 365]
-};
-const pricing = {
-	streakFreeze: 75
-}
-let passwordHash = null;
-let passwordHashCheck = null;
-let currentStreak = 0;
-let currentFreezes = 2;
-let currentGems = 100;
-let nextMilestoneRewards = structuredClone(milestoneRewards);
-
-const serialiseData = async (passHash = passwordHash) =>
-	JSON.stringify({
-		s: currentStreak,
-		f: currentFreezes,
-		g: currentGems,
-		h: passHash,
-		m: nextMilestoneRewards,
-		c: await hash(JSON.stringify({
-			s: currentStreak,
-			f: currentFreezes,
-			g: currentGems,
-			h: passHash,
-			m: nextMilestoneRewards
-		}))
-	});
-
-async function autosave() {
-	if (passwordHash !== passwordHashCheck && passwordHashCheck !== null) {
-		return;
-	}
-	const content = await serialiseData();
-	localStorage.setItem("autosave_data", content);
-	localStorage.setItem("autosave_time", Date.now());
-}
-
-changeForm.addEventListener("submit", async (e) => {
+changeForm.addEventListener("submit", (e) => {
 	e.preventDefault();
-	if (!changeInput.value) return;
+});
+
+changeForm.addEventListener("input", async (e) => {
+	e.preventDefault();
+	if (changeInput.value === "") {
+		passwordHash = null;
+		return;
+	}
 	passwordHash = await hash(changeInput.value);
-	changeInput.value = "";
-	showAlert("Password updated", "green");
-	autosave();
 });
 
-exportButton.addEventListener("click", async () => {
-	if (passwordHash === null && passwordHashCheck === null) {
-		showAlert("Please add a password", "red");
+changeButtonArr[0].addEventListener("click", async () => {
+	if (syncing) return;
+	setSyncStatus(true);
+	let r = await postKV("streak", currentStreak + 1, passwordHash ?? true);
+	if (!r) {
+		setSyncStatus(false);
 		return;
 	}
-	const content = await serialiseData((
-		passwordHash === passwordHashCheck || passwordHashCheck === null
-	) ? passwordHash : passwordHashCheck
-	);
-	const blob = new Blob([content], { type: "application/json" });
-	const url = URL.createObjectURL(blob);
-	const link = document.createElement("a");
-	link.href = url;
-	const fname = `lewins-streak@${Date.now()}.streak`;
-	link.download = fname;
-	hiddenDiv.appendChild(link);
-	link.click();
-	hiddenDiv.removeChild(link);
-	URL.revokeObjectURL(url);
-	showAlert(`Downloaded file as "${fname}"`, "cadetblue");
-});
-
-importButton.addEventListener("click", () => {
-	fileInput.click();
-});
-
-async function handleInputFile(ev) {
-	try {
-		data = JSON.parse(ev.target.result);
-	} catch {
-		showAlert("Wrong password", "red");
-		return;
-	}
-	if (!await checkChecksum(data)) {
-		showAlert("Corrupted data", "red");
-		return;
-	}
-	currentStreak = data.s;
-	currentFreezes = data.f;
-	currentGems = data.g;
-	passwordHashCheck = data.h;
-	nextMilestoneRewards = data.m;
-	showAlert("Successfully imported streak data", "green");
-	autosave();
-}
-
-fileInput.addEventListener("change", (e) => {
-	const file = e.target.files[0];
-	if (!file) return;
-	const reader = new FileReader();
-	reader.onload = handleInputFile;
-	reader.readAsText(file);
-	fileInput.value = "";
-});
-
-changeButtonArr[0].addEventListener("click", () => {
-	if (passwordHash !== passwordHashCheck && passwordHashCheck) {
-		showAlert("Wrong password", "red");
-		return;
-	}
-	currentStreak++;
+	currentStreak = r.value;
 	let reward = 0;
 	for (const k in nextMilestoneRewards) {
 		const v = nextMilestoneRewards[k];
@@ -191,96 +160,90 @@ changeButtonArr[0].addEventListener("click", () => {
 			v[1] += parseInt(k);
 		}
 	}
-	currentGems += reward;
 	if (reward !== 0) {
 		showAlert(
-			`You got ${reward} gems for reaching a ${currentStreak} day streak!`,
+			`You got ${reward} bonus gems for reaching a ${currentStreak} day s`
+			+ "treak!",
 			"green",
 			3000
 		);
 		launchConfetti();
+		r = await postKV("gems", currentGems + reward, passwordHash ?? true);
+		currentGems = r.value;
+		r = await postKV(
+			"nextms", JSON.stringify(nextMilestoneRewards), passwordHash ?? true
+		);
+		nextMilestoneRewards = JSON.parse(r.value);
 	}
-	autosave();
+	setSyncStatus(false);
 });
 
-changeButtonArr[1].addEventListener("click", () => {
-	if (passwordHash !== passwordHashCheck && passwordHashCheck) {
-		showAlert("Wrong password", "red");
-		return;
-	}
+changeButtonArr[1].addEventListener("click", async () => {
+	if (syncing) return;
 	if (currentFreezes >= 5) {
 		showAlert("Maximum streak freezes reached", "darkgoldenrod");
 		return;
 	}
 	if (currentGems < pricing.streakFreeze) {
-		showAlert(`Not enough gems! Requires ${pricing.streakFreeze}`, "darkgoldenrod");
+		showAlert(
+			`Not enough gems! Requires ${pricing.streakFreeze}`, "darkgoldenrod"
+		);
 		return;
 	}
-	if (!confirm(`Buy 1 streak freeze for ${pricing.streakFreeze} gems?`)) return;
-	currentFreezes++;
-	currentGems -= pricing.streakFreeze;
+	if (!confirm(
+		`Buy 1 streak freeze for ${pricing.streakFreeze} gems?`
+	)) return;
+	setSyncStatus(true);
+	let r = await postKV("freezes", currentFreezes + 1, passwordHash ?? true);
+	if (!r) {
+		setSyncStatus(false);
+		return;
+	}
+	currentFreezes = r.value;
+	r = await postKV(
+		"gems", currentGems - pricing.streakFreeze, passwordHash ?? true
+	);
+	currentGems = r.value;
 	showAlert("Bought +1 streak freeze", "cadetblue");
-	autosave();
+	setSyncStatus(false);
 });
 
-changeButtonArr[2].addEventListener("click", () => {
-	if (passwordHash !== passwordHashCheck && passwordHashCheck) {
-		showAlert("Wrong password", "red");
-		return;
-	}
+changeButtonArr[2].addEventListener("click", async () => {
+	if (syncing) return;
 	if (currentFreezes <= 0) {
 		showAlert("No streak freezes left", "darkgoldenrod");
 		return;
 	}
-	currentFreezes--;
-	autosave();
-});
-
-changeButtonArr[3].addEventListener("click", () => {
-	if (passwordHash !== passwordHashCheck && passwordHashCheck) {
-		showAlert("Wrong password", "red");
+	setSyncStatus(true);
+	const r = await postKV("freezes", currentFreezes - 1, passwordHash ?? true);
+	if (!r) {
+		setSyncStatus(false);
 		return;
 	}
-	if (confirm("Reset streak and password?")) {
-		currentStreak = 0;
-		currentFreezes = 2;
-		currentGems = 100;
-		passwordHash = null;
-		passwordHashCheck = null;
-		nextMilestoneRewards = structuredClone(milestoneRewards);
-		localStorage.removeItem("autosave_data");
-		localStorage.removeItem("autosave_time");
+	currentFreezes = r.value;
+	setSyncStatus(false);
+});
+
+changeButtonArr[3].addEventListener("click", async () => {
+	if (syncing) return;
+	if (!confirm("Reset streak?")) return;
+	resetAll();
+	setSyncStatus(true);
+	if (!await postKV("streak", currentStreak, passwordHash ?? true)) {
+		setSyncStatus(false);
+		return;
 	}
+	await postKV("freezes", currentFreezes, passwordHash ?? true);
+	await postKV("gems", currentGems, passwordHash ?? true);
+	await postKV(
+		"nextms", JSON.stringify(nextMilestoneRewards), passwordHash ?? true
+	);
+	setSyncStatus(false);
 });
 
 (async () => {
-	const savedData = localStorage.getItem("autosave_data");
-	if (savedData !== null) {
-		const data = JSON.parse(savedData);
-		if (!await checkChecksum(data)) {
-			localStorage.removeItem("autosave_data");
-			localStorage.removeItem("autosave_time");
-			return;
-		}
-		currentStreak = data.s;
-		currentFreezes = data.f;
-		currentGems = data.g;
-		passwordHashCheck = data.h;
-		nextMilestoneRewards = data.m;
-		const savedTime = localStorage.getItem("autosave_time") ?? "[unknown]";
-		showAlert(`Loaded autosave@${savedTime}`, "cadetblue");
-		if (passwordHashCheck === null) showAlert(
-			"Note: You have not set a password yet",
-			"cadetblue",
-			5000
-		);
-	}
+	setSyncStatus(true);
+	await getKV();
+	setSyncStatus(false);
+	updateDisplayed();
 })();
-
-function updateDisplayed() {
-	streakSpan.innerText = currentStreak;
-	freezesSpan.innerText = currentFreezes;
-	gemsSpan.innerText = currentGems;
-	requestAnimationFrame(updateDisplayed);
-}
-updateDisplayed();
