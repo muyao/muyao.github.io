@@ -10,10 +10,10 @@ const freezesSpan = document.querySelector("#freezes");
 const gemsSpan = document.querySelector("#gems");
 const confCanvas = document.querySelector("#confetti-canvas")
 
-const confettiFX = new ConfettiEngine(confCanvas, 0.7);
+const confettiFX = new ConfettiEngine(confCanvas, 0.4);
 function launchConfetti() {
 	confettiFX.burst({
-		count: 100,
+		count: 160,
 		angmod1: 0.125,
 		angmod2: 1.5 * Math.PI,
 		velmod: 1.5,
@@ -21,7 +21,7 @@ function launchConfetti() {
 		y: confCanvas.height
 	});
 	confettiFX.burst({
-		count: 100,
+		count: 160,
 		angmod1: 0.125,
 		angmod2: 1.25 * Math.PI,
 		velmod: 1.5,
@@ -30,7 +30,14 @@ function launchConfetti() {
 	});
 }
 
-const pricing = { streakFreeze: 75 };
+const pricing = {
+	streakFreeze: 15
+};
+const earning = {
+	dailyMin: 2,
+	dailyMax: 7,
+	bonusMod: 5
+};
 let passwordHash = null;
 let syncing = false;
 
@@ -42,14 +49,14 @@ let nextMilestoneRewards;
 function resetAll() {
 	currentStreak = 0;
 	currentFreezes = 2;
-	currentGems = 100;
+	currentGems = 25;
 	nextMilestoneRewards = {
-		"10": [5, 10],
+		"0": [115, 365],
+		"10": [7, 10],
 		"25": [10, 25],
 		"50": [15, 50],
 		"100": [25, 100],
 		"200": [50, 200],
-		"365": [115, 365]
 	};
 }
 resetAll();
@@ -104,7 +111,6 @@ async function getKV() {
 	currentFreezes = parseInt(response.f);
 	currentGems = parseInt(response.g);
 	nextMilestoneRewards = JSON.parse(response.m);
-
 }
 
 async function postKV(key, value, passhash) {
@@ -152,6 +158,16 @@ changeButtonArr[0].addEventListener("click", async () => {
 		return;
 	}
 	currentStreak = r.value;
+	const dailyEarn = Math.floor(
+		(earning.dailyMax - earning.dailyMin) * Math.random()
+	) + earning.dailyMin;
+	showAlert(
+		`+${dailyEarn} gems for extending your streak today`,
+		"cadetblue",
+		3000
+	);
+	r = await postKV("gems", currentGems + dailyEarn, passwordHash ?? true);
+	currentGems = r.value;
 	let reward = 0;
 	for (const k in nextMilestoneRewards) {
 		const v = nextMilestoneRewards[k];
@@ -161,14 +177,15 @@ changeButtonArr[0].addEventListener("click", async () => {
 		}
 	}
 	if (reward !== 0) {
+		const randBonus = Math.floor(earning.bonusMod * Math.random());
 		showAlert(
-			`You got ${reward} bonus gems for reaching a ${currentStreak} day s`
-			+ "treak!",
+			`+${reward + randBonus} bonus gems for reaching a ${currentStreak} `
+			+ "day streak",
 			"green",
 			3000
 		);
 		launchConfetti();
-		r = await postKV("gems", currentGems + reward, passwordHash ?? true);
+		r = await postKV("gems", currentGems + reward + randBonus, passwordHash ?? true);
 		currentGems = r.value;
 		r = await postKV(
 			"nextms", JSON.stringify(nextMilestoneRewards), passwordHash ?? true

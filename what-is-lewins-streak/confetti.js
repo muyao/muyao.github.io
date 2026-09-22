@@ -22,7 +22,7 @@ class ConfettiEngine {
 	}) {
 		for (let i = 0; i < count; i++) {
 			const angle = angmod1 * (Math.random() * Math.PI * 2) + angmod2;
-			const speed = velmod * (Math.random() * 25 + 5);
+			const speed = velmod * (Math.random() * 25 + 1);
 			this.particles.push({
 				x, y,
 				vx: Math.cos(angle) * speed,
@@ -41,7 +41,7 @@ class ConfettiEngine {
 			p.x += p.vx;
 			p.y += p.vy;
 			p.vy += this.gravity;
-			p.opacity -= 0.01;
+			p.opacity -= 0.005;
 			p.rotation += p.spin;
 
 			this.ctx.save();
