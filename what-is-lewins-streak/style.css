@@ -2,6 +2,13 @@ header {
 	padding-bottom: 1rem;
 }
 
+.header-title {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
 .info-main-container {
 	display: flex;
 	flex-direction: row;
