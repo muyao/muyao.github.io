@@ -248,9 +248,8 @@ changeButtonArr[3].addEventListener("click", async () => {
 	resetAll();
 	setSyncStatus(true);
 	if (!await postKV("streak", currentStreak, passwordHash ?? true)) {
-		setTimeout(() => {
-			window.location.reload();
-		}, showAlertDefaultDur);
+		await getKV();
+		setSyncStatus(false);
 		return;
 	}
 	await postKV("freezes", currentFreezes, passwordHash ?? true);
