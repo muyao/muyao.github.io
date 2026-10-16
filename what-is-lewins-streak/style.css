@@ -65,15 +65,6 @@ input {
 	padding-top: 0.5rem;
 }
 
-.clickable {
-	margin-right: 1rem;
-	user-select: none;
-}
-
-.clickable:hover {
-	text-decoration: underline;
-}
-
 .hidden {
 	display: none;
 }
