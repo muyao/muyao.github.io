@@ -63,7 +63,7 @@ function updateTplus() {
 const tplusUpdatorInterval = setInterval(updateTplus, 1000);
 
 function updateSpeed(timeNow, speed) {
-	if (false/*speed === null*/) {
+	if (speed !== null) {
 		speedMPerS = speed;
 		return;
 	}
