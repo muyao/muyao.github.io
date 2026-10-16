@@ -1,4 +1,5 @@
 const speedSpan = document.querySelector("#speed");
+const altitudeSpan = document.querySelector("#altitude");
 const tplusSpan = document.querySelector("#tplus");
 const accSpan = document.querySelector("#acc");
 const speedUnitSpan = document.querySelector("#speed-unit");
@@ -15,6 +16,7 @@ let lon2 = null;
 let speedMPerS = null;
 let lastMeasureT = null;
 let accM = null;
+let altitudeM = null;
 
 let currUnit = 0;
 
@@ -51,6 +53,7 @@ function updateInfos() {
 	}
 	if (!lastMeasureT) return;
 	speedSpan.innerText = Math.floor(speedConvFactor * speedMPerS);
+	altitudeSpan.innerText = altitudeM ?? "-";
 	accSpan.innerText = Math.floor(accConvFactor * accM);
 	tplusSpan.innerText = Math.floor((Date.now() - lastMeasureT) / 1000);
 }
@@ -105,6 +108,7 @@ startButton.addEventListener("click", (ev) => {
 			lat1 = pos.coords.latitude;
 			lon1 = pos.coords.longitude;
 			accM = pos.coords.accuracy;
+			altitudeM = pos.coords.altitude;
 			updateInfos();
 		},
 		(err) => {
