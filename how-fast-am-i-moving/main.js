@@ -53,7 +53,7 @@ function updateInfos() {
 	}
 	if (!lastMeasureT) return;
 	speedSpan.innerText = Math.floor(speedConvFactor * speedMPerS);
-	altitudeSpan.innerText = altitudeM ?? "-";
+	altitudeSpan.innerText = altitudeM ?? "?";
 	accSpan.innerText = Math.floor(accConvFactor * accM);
 	tplusSpan.innerText = Math.floor((Date.now() - lastMeasureT) / 1000);
 }
@@ -108,7 +108,7 @@ startButton.addEventListener("click", (ev) => {
 			lat1 = pos.coords.latitude;
 			lon1 = pos.coords.longitude;
 			accM = pos.coords.accuracy;
-			altitudeM = pos.coords.altitude;
+			altitudeM = Math.floor(pos.coords.altitude);
 			updateInfos();
 		},
 		(err) => {
