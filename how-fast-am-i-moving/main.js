@@ -24,6 +24,17 @@ let currUnit = 0;
 
 let watchId = null;
 
+const allSpeeds = [];
+
+const getMedian = (arr) => {
+	if (!arr.length) return;
+	const sorted = arr.toSorted((a, b) => a - b);
+	const midIdx = Math.floor(sorted.length / 2);
+	return sorted.length % 2 === 0
+		? (sorted[midIdx - 1] + sorted[midIdx]) / 2
+		: sorted[midIdx];
+};
+
 function updateInfos() {
 	let speedConvFactor = null;
 	let accConvFactor = null;
@@ -81,28 +92,33 @@ function updateTplus() {
 const tplusUpdatorInterval = setInterval(updateTplus, 1000);
 
 function updateSpeed(timeNow, speed) {
-	if (speed !== null) {
-		speedMPerS = speed;
-		noteDiv.hidden = true;
-		return;
+	try {
+		if (speed !== null) {
+			allSpeeds.push(speed);
+			noteDiv.hidden = true;
+			return;
+		}
+		const R = 6371000;
+		const lat1_rad = lat1 * Math.PI / 180;
+		const lat2_rad = lat2 * Math.PI / 180;
+		const lon1_rad = lon1 * Math.PI / 180;
+		const lon2_rad = lon2 * Math.PI / 180;
+		const dlat = lat2_rad - lat1_rad;
+		const dlon = lon2_rad - lon1_rad;
+		const a_1 = Math.sin(dlat / 2) * Math.sin(dlat / 2);
+		const a_2 = Math.cos(lat1_rad) * Math.cos(lat2_rad);
+		const a_3 = Math.sin(dlon / 2) * Math.sin(dlon / 2);
+		const a = a_1 + (a_2 * a_3);
+		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		const d = R * c;
+		const dt = (timeNow - lastMeasureT) / 1000;
+		if (dt <= 0) return;
+		allSpeeds.push(d / dt);
+		noteDiv.hidden = false;
+	} finally {
+		if (allSpeeds.length > 256) allSpeeds.shift();
+		speedMPerS = getMedian(allSpeeds);
 	}
-	const R = 6371000;
-	const lat1_rad = lat1 * Math.PI / 180;
-	const lat2_rad = lat2 * Math.PI / 180;
-	const lon1_rad = lon1 * Math.PI / 180;
-	const lon2_rad = lon2 * Math.PI / 180;
-	const dlat = lat2_rad - lat1_rad;
-	const dlon = lon2_rad - lon1_rad;
-	const a_1 = Math.sin(dlat / 2) * Math.sin(dlat / 2);
-	const a_2 = Math.cos(lat1_rad) * Math.cos(lat2_rad);
-	const a_3 = Math.sin(dlon / 2) * Math.sin(dlon / 2);
-	const a = a_1 + (a_2 * a_3);
-	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-	const d = R * c;
-	const dt = (timeNow - lastMeasureT) / 1000;
-	if (dt <= 0) return;
-	speedMPerS = d / dt;
-	noteDiv.hidden = false;
 }
 
 changeUnitsButton.addEventListener("click", (ev) => {
