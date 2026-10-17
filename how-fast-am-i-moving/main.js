@@ -7,6 +7,7 @@ const accUnitSpan = document.querySelector("#acc-unit");
 const startButton = document.querySelector("#start");
 const changeUnitsButton = document.querySelector("#change-units");
 const resetButton = document.querySelector("#reset");
+const noteDiv = document.querySelector("#note");
 
 let lat1 = null;
 let lon1 = null;
@@ -68,6 +69,7 @@ const tplusUpdatorInterval = setInterval(updateTplus, 1000);
 function updateSpeed(timeNow, speed) {
 	if (speed !== null) {
 		speedMPerS = speed;
+		noteDiv.hidden = true;
 		return;
 	}
 	const R = 6371000;
@@ -84,7 +86,9 @@ function updateSpeed(timeNow, speed) {
 	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 	const d = R * c;
 	const dt = (timeNow - lastMeasureT) / 1000;
-	if (dt > 0) speedMPerS = d / dt;
+	if (dt <= 0) return;
+	speedMPerS = d / dt;
+	noteDiv.hidden = false;
 }
 
 changeUnitsButton.addEventListener("click", (ev) => {

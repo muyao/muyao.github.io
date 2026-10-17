@@ -52,6 +52,12 @@ header {
 	content: "> ";
 }
 
+.note {
+	padding-top: 2.5rem;
+	font-size: small;
+	font-style: italic;
+}
+
 @media (max-width: 37.5rem) {
 	.header-extras {
 		display: none;
