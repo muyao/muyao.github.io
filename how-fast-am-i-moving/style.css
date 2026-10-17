@@ -52,13 +52,13 @@ header {
 	content: "> ";
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5rem) {
 	.header-extras {
 		display: none;
 	}
 }
 
-@media (max-width: 360px) {
+@media (max-width: 22.5rem) {
 	.info-container-row {
 		padding-bottom: 2rem;
 	}
