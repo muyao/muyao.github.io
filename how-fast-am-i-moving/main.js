@@ -4,6 +4,7 @@ const tplusSpan = document.querySelector("#tplus");
 const accSpan = document.querySelector("#acc");
 const speedUnitSpan = document.querySelector("#speed-unit");
 const accUnitSpan = document.querySelector("#acc-unit");
+const altitudeUnitSpan = document.querySelector("#altitude-unit");
 const startButton = document.querySelector("#start");
 const changeUnitsButton = document.querySelector("#change-units");
 const resetButton = document.querySelector("#reset");
@@ -26,35 +27,48 @@ let watchId = null;
 function updateInfos() {
 	let speedConvFactor = null;
 	let accConvFactor = null;
+	let altConvFactor = null;
 	switch (currUnit) {
 		case 0:
 			speedConvFactor = 3.6;
 			accConvFactor = 1.0;
+			altConvFactor = 1.0;
 			speedUnitSpan.innerText = "km/h";
 			accUnitSpan.innerText = "m";
+			altitudeUnitSpan.innerText = "m";
 			break;
 		case 1:
 			speedConvFactor = 1.0;
 			accConvFactor = 1.0;
+			altConvFactor = 1.0;
 			speedUnitSpan.innerText = "m/s";
 			accUnitSpan.innerText = "m";
+			altitudeUnitSpan.innerText = "m";
 			break;
 		case 2:
 			speedConvFactor = 2.23694;
 			accConvFactor = 3.28084;
+			altConvFactor = 3.28084;
 			speedUnitSpan.innerText = "mph";
 			accUnitSpan.innerText = "ft";
+			altitudeUnitSpan.innerText = "ft";
 			break;
 		case 3:
 			speedConvFactor = 1.94384;
 			accConvFactor = 1.0;
+			altConvFactor = 3.28084;
 			speedUnitSpan.innerText = "knots";
 			accUnitSpan.innerText = "m";
+			altitudeUnitSpan.innerText = "ft";
 			break;
 	}
 	if (!lastMeasureT) return;
 	speedSpan.innerText = Math.floor(speedConvFactor * speedMPerS);
-	altitudeSpan.innerText = altitudeM === null ? "?" : Math.floor(altitudeM);
+	if (altitudeM === null) {
+		altitudeSpan.innerText = "?";
+	} else {
+		altitudeSpan.innerText = Math.floor(altConvFactor * altitudeM);
+	}
 	accSpan.innerText = Math.floor(accConvFactor * accM);
 	tplusSpan.innerText = Math.floor((Date.now() - lastMeasureT) / 1000);
 }
