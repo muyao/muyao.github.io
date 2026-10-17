@@ -116,13 +116,14 @@ startButton.addEventListener("click", (ev) => {
 	if (lastMeasureT) return;
 	watchId = navigator.geolocation.watchPosition(
 		(pos) => {
+			console.log(pos);
+			if (pos.timestamp <= lastMeasureT) return;
 			if (lastMeasureT) {
 				lat2 = pos.coords.latitude;
 				lon2 = pos.coords.longitude;
-				updateSpeed(Date.now(), pos.coords.speed);
+				updateSpeed(pos.timestamp, pos.coords.speed);
 			}
-			console.log(pos);
-			lastMeasureT = Date.now();
+			lastMeasureT = pos.timestamp;
 			lat1 = pos.coords.latitude;
 			lon1 = pos.coords.longitude;
 			accM = pos.coords.accuracy;
