@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Number Converter</title>
+	<link rel="stylesheet" href="/style-global.css">
+	<style>
+		label {
+			display: block;
+			padding-bottom: 0.2rem;
+		}
+
+		input {
+			display: block;
+			width: 20rem;
+			height: 3rem;
+			padding-left: 0.3rem;
+			padding-right: 0.3rem;
+			font-family: 'Courier New', Courier, monospace;
+			font-size: 1.5rem;
+			box-sizing: border-box;
+		}
+
+		header {
+			padding-bottom: 2rem;
+		}
+
+		.num-container {
+			padding-bottom: 2rem;
+		}
+
+		@media (max-width: 28.125rem) {
+			input {
+				width: 100%;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<header>
+		<h1>Number Converter</h1>
+		<hr>
+	</header>
+	<main>
+		<form>
+			<div class="num-container">
+				<label for="dec">Decimal</label>
+				<input id="dec">
+			</div>
+			<div class="num-container">
+				<label for="hex">Hex</label>
+				<input id="hex">
+			</div>
+			<div class="num-container">
+				<label for="bin">Binary</label>
+				<input id="bin">
+			</div>
+			<div class="num-container">
+				<label for="oct">Octal</label>
+				<input id="oct">
+			</div>
+		</form>
+	</main>
+	<script>
+		const decInput = document.querySelector("#dec");
+		const hexInput = document.querySelector("#hex");
+		const binInput = document.querySelector("#bin");
+		const octInput = document.querySelector("#oct");
+
+		function clearVals() {
+			decInput.value = "";
+			hexInput.value = "";
+			binInput.value = "";
+			octInput.value = "";
+		}
+
+		decInput.addEventListener("input", function (e) {
+			if (!this.value) clearVals();
+			const num = parseInt(this.value);
+			if (isNaN(num)) return;
+			hexInput.value = num.toString(16);
+			binInput.value = num.toString(2);
+			octInput.value = num.toString(8);
+		});
+
+		hexInput.addEventListener("input", function (e) {
+			if (!this.value) clearVals();
+			const num = parseInt(this.value, 16);
+			if (isNaN(num)) return;
+			decInput.value = num;
+			binInput.value = num.toString(2);
+			octInput.value = num.toString(8);
+		});
+
+		binInput.addEventListener("input", function (e) {
+			if (!this.value) clearVals();
+			const num = parseInt(this.value, 2);
+			if (isNaN(num)) return;
+			decInput.value = num;
+			hexInput.value = num.toString(16);
+			octInput.value = num.toString(8);
+		});
+
+		octInput.addEventListener("input", function (e) {
+			if (!this.value) clearVals();
+			const num = parseInt(this.value, 8);
+			if (isNaN(num)) return;
+			decInput.value = num;
+			hexInput.value = num.toString(16);
+			binInput.value = num.toString(2);
+		});
+	</script>
+</body>
+
+</html>
