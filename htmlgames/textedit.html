@@ -44,6 +44,9 @@
 			display: none;
 		}
 	</style>
+	<link href="/style-global.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	<script src="/custom-elements.js"></script>
 </head>
 
 <body>
@@ -56,6 +59,7 @@
 		<div class="button" id="load">Load</div>
 	</div>
 	<input type="file" id="fileinput" accept=".txt,text/plain">
+	<global-footer></global-footer>
 	<script>
 		const textarea = document.getElementById("editor");
 		const loadBtn = document.getElementById("load");

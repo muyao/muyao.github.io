@@ -6,10 +6,6 @@ header {
 	letter-spacing: 0.125rem;
 }
 
-.visit-my-gh {
-	font-style: italic;
-}
-
 main {
 	display: flex;
 	flex-direction: row;
@@ -30,8 +26,4 @@ main {
 
 .category-label {
 	font-size: 1.17rem;
-}
-
-.fa-brands {
-	margin-right: 0.5rem;
 }
