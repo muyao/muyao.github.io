@@ -35,3 +35,11 @@ input {
     padding-left: 1rem;
     align-content: center;
 }
+
+.result-code {
+    display: none;
+    padding-left: 0.5rem;
+    font-size: small;
+    font-style: italic;
+    color: gray
+}

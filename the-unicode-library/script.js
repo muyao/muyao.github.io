@@ -40,19 +40,23 @@
     }
 
     // Create single result
-    function createResultElement(char, name) {
+    function createResultElement(char, charCode, name) {
         const resultContainer = document.createElement("div");
         const result = document.createElement("div");
         result.className = "result";
         const charSpan = document.createElement("span");
         charSpan.className = "result-char";
         charSpan.innerText = char;
-        const datSpan = document.createElement("span");
-        datSpan.className = "result-name";
-        datSpan.innerText = name;
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "result-name";
+        nameSpan.innerText = name;
+        const codeSpan = document.createElement("span");
+        codeSpan.className = "result-code";
+        codeSpan.innerText = charCode;
 
+        nameSpan.appendChild(codeSpan);
         result.appendChild(charSpan);
-        result.appendChild(datSpan);
+        result.appendChild(nameSpan);
         resultContainer.appendChild(result)
 
         resultContainer.addEventListener("click", async () => {
@@ -65,11 +69,13 @@
 
         resultContainer.addEventListener("mouseenter", () => {
             resultContainer.style.paddingLeft = "1rem";
+            codeSpan.style.display = "inline";
         });
 
         resultContainer.addEventListener("mouseleave", () => {
             resultContainer.style.paddingLeft = "0";
             result.style.border = "1px solid gray";
+            codeSpan.style.display = "none";
         });
 
         resultContainer.addEventListener("mousedown", () => {
@@ -88,7 +94,7 @@
         removeResults();
         results.forEach((r) => {
             if (resultsDiv.childNodes.length >= 255) return;
-            const elem = createResultElement(r.char, r.name);
+            const elem = createResultElement(r.char, r.charCode, r.name);
             resultsDiv.appendChild(elem);
         })
     }
